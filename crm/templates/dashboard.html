@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ 'Отдел продаж' if user.is_admin else 'Мои продажи' }}</h1>
+<div class="row">
+  <div class="card kpi">Сделок в работе<b>{{ r.open_count }}</b><small>на {{ r.open_amount|rub }}</small></div>
+  <div class="card kpi good">Выиграно в этом месяце<b>{{ r.won_month_amount|rub }}</b><small>{{ r.won_month_count }} {{ r.won_month_count|plural('сделка', 'сделки', 'сделок') }}</small></div>
+  <div class="card kpi">Конверсия в победу<b>{{ r.conversion }}%</b><small>от закрытых сделок</small></div>
+  <div class="card kpi {{ 'bad' if r.overdue }}">Просроченные задачи<b>{{ r.overdue }}</b><small><a href="/tasks">открыть задачи</a></small></div>
+</div>
+<div class="row">
+  <div class="card">
+    <h2>Воронка</h2>
+    {% set top = r.funnel.values()|map(attribute='amount')|max %}
+    {% for key, f in r.funnel.items() %}
+      <div class="muted" style="font-size:13px">{{ f.title }} · {{ f.count }} шт.</div>
+      <div class="bar {{ key }}"><i style="width: {{ (100 * f.amount / top) if top else 0 }}%"></i><span>{{ f.amount|rub }}</span></div>
+    {% endfor %}
+  </div>
+  <div class="card">
+    <h2>Задачи на сегодня и просроченные</h2>
+    {% for t in r.today_tasks %}
+      <div class="event">
+        <span class="{{ 'overdue' if t.overdue }}">{{ t.due.strftime('%d.%m') }}</span> · {{ t.title }}
+        {% if t.deal %}<br><small><a href="/deals/{{ t.deal.id }}">{{ t.deal.title }}</a>{% if user.is_admin %} · {{ t.owner.name }}{% endif %}</small>{% endif %}
+      </div>
+    {% else %}
+      <p class="muted">На сегодня всё сделано 🎉</p>
+    {% endfor %}
+  </div>
+</div>
+{% if user.is_admin %}
+<div class="card">
+  <h2>Менеджеры</h2>
+  <table>
+    <tr><th>Менеджер</th><th class="num">Сделок в работе</th><th class="num">В работе на сумму</th><th class="num">Выиграно за месяц</th><th class="num">Конверсия</th></tr>
+    {% for m in r.managers %}
+    <tr><td>{{ m.name }}</td><td class="num">{{ m.open }}</td><td class="num">{{ m.open_amount|rub }}</td>
+        <td class="num"><b>{{ m.won_month|rub }}</b></td><td class="num">{{ m.conversion }}%</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+{% endblock %}

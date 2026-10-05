@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Сделки</h1>
+<div class="toolbar">
+  {% if user.is_admin %}
+  <form method="get" action="/deals">
+    <select name="owner" onchange="this.form.submit()">
+      <option value="">Все менеджеры</option>
+      {% for m in managers %}<option value="{{ m.id }}" {{ 'selected' if owner == m.id }}>{{ m.name }}</option>{% endfor %}
+    </select>
+  </form>
+  {% endif %}
+  <details>
+    <summary>+ Новая сделка</summary>
+    <form method="post" action="/deals" class="form-grid card">
+      <label>Название<input name="title" required></label>
+      <label>Клиент<select name="client_id" required>{% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></label>
+      <label>Сумма, ₽<input name="amount" type="number" min="0" value="0"></label>
+      {% if user.is_admin %}<label>Ответственный<select name="owner_id">{% for m in managers %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}</select></label>{% endif %}
+      <button>Создать</button>
+    </form>
+  </details>
+</div>
+<div class="board">
+  {% for stage, deals in columns.items() %}
+  <div class="col">
+    <h3>{{ STAGE_TITLES[stage] }} <small>{{ deals|length }} · {{ deals|sum(attribute='amount')|rub }}</small></h3>
+    {% for d in deals %}
+      <a class="deal" href="/deals/{{ d.id }}">
+        <b>{{ d.title }}</b>
+        <small>{{ d.client.name }}</small>
+        {% if user.is_admin %}<small>{{ d.owner.name }}</small>{% endif %}
+        <div class="sum">{{ d.amount|rub }}</div>
+      </a>
+    {% else %}
+      <p class="muted" style="font-size:13px">Пусто</p>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

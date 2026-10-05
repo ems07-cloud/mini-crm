@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Мини-CRM{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="side">
+    <div class="brand">Мини<span>CRM</span></div>
+    <a href="/" class="{{ 'on' if page == 'dashboard' }}">📊 Главная</a>
+    <a href="/deals" class="{{ 'on' if page in ('deals', 'deal') }}">💼 Сделки</a>
+    <a href="/clients" class="{{ 'on' if page in ('clients', 'client') }}">🏢 Клиенты</a>
+    <a href="/tasks" class="{{ 'on' if page == 'tasks' }}">✅ Задачи</a>
+    {% if user.is_admin %}<a href="/users" class="{{ 'on' if page == 'users' }}">👥 Сотрудники</a>{% endif %}
+    <a href="/export/deals.xlsx">⬇️ Сделки в Excel</a>
+    <div class="me">
+      <b>{{ user.name }}</b>
+      {{ 'Руководитель' if user.is_admin else 'Менеджер' }} · <a href="/logout">выйти</a>
+    </div>
+  </nav>
+  <main class="main">{% block content %}{% endblock %}</main>
+</div>
+</body>
+</html>

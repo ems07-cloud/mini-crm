@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="muted"><a href="/deals">← Сделки</a></p>
+<h1>{{ deal.title }} <span class="badge {{ deal.stage }}">{{ deal.stage_title }}</span></h1>
+<div class="row">
+  <div class="card kpi">Сумма<b>{{ deal.amount|rub }}</b></div>
+  <div class="card kpi">Клиент<b style="font-size:18px"><a href="/clients/{{ deal.client.id }}">{{ deal.client.name }}</a></b>
+    <small>{{ deal.client.contact }} {{ deal.client.phone }}</small></div>
+  <div class="card kpi">Ответственный<b style="font-size:18px">{{ deal.owner.name }}</b><small>создана {{ deal.created_at.strftime('%d.%m.%Y') }}</small></div>
+</div>
+<div class="card">
+  <h2>Этап</h2>
+  <div class="stages">
+    {% for s, title in STAGE_TITLES.items() %}
+    <form class="inline" method="post" action="/deals/{{ deal.id }}/stage">
+      <input type="hidden" name="stage" value="{{ s }}">
+      <button class="{{ 'on' if s == deal.stage }} {{ 'ok' if s == 'won' else ('no' if s == 'lost' else ('' if s == deal.stage else 'light')) }}">{{ title }}</button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+<div class="row">
+  <div class="card">
+    <h2>История</h2>
+    <form method="post" action="/deals/{{ deal.id }}/note">
+      <textarea name="text" placeholder="Заметка: о чём договорились, что дальше…" required></textarea>
+      <p><button>Добавить заметку</button></p>
+    </form>
+    {% for e in deal.events %}
+      <div class="event">{{ e.text }}<br><small>{{ e.user.name }} · {{ e.at.strftime('%d.%m.%Y %H:%M') }}</small></div>
+    {% endfor %}
+  </div>
+  <div class="card">
+    <h2>Задачи по сделке</h2>
+    {% for t in tasks %}
+      <div class="event">
+        {% if t.done %}<s class="muted">{{ t.title }}</s>{% else %}
+        <form class="inline" method="post" action="/tasks/{{ t.id }}/done"><input type="hidden" name="next" value="/deals/{{ deal.id }}"><button class="light" title="Готово">✓</button></form>
+        {{ t.title }}{% endif %}
+        <br><small class="{{ 'overdue' if t.overdue }}">до {{ t.due.strftime('%d.%m.%Y') }}</small>
+      </div>
+    {% else %}<p class="muted">Задач нет</p>{% endfor %}
+    <form method="post" action="/tasks" class="form-grid" style="margin-top:12px">
+      <input type="hidden" name="deal_id" value="{{ deal.id }}">
+      <label>Задача<input name="title" required placeholder="Позвонить, отправить КП…"></label>
+      <label>Срок<input name="due" type="date" value="{{ today().isoformat() }}" required></label>
+      <button>Добавить</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

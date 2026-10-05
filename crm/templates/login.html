@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — Мини-CRM</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="login card">
+  <h1>Мини-CRM</h1>
+  <p class="muted">Войдите, чтобы продолжить</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" action="/login">
+    <input name="email" type="email" placeholder="Email" required autofocus>
+    <input name="password" type="password" placeholder="Пароль" required>
+    <button>Войти</button>
+  </form>
+  <div class="hint">Демо: руководитель <b>boss@demo.ru</b>, менеджеры <b>anna@demo.ru</b> и <b>igor@demo.ru</b> — пароль у всех <b>demo12345</b></div>
+</div>
+</body>
+</html>

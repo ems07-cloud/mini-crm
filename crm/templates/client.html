@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="muted"><a href="/clients">← Клиенты</a></p>
+<h1>{{ client.name }}</h1>
+<div class="row">
+  <div class="card kpi">Контакт<b style="font-size:18px">{{ client.contact or '—' }}</b><small>{{ client.phone }} {{ client.email }}</small></div>
+  <div class="card kpi">Источник<b style="font-size:18px">{{ client.source or '—' }}</b><small>с {{ client.created_at.strftime('%d.%m.%Y') }}</small></div>
+  <div class="card kpi">Выиграно сделок<b>{{ deals|selectattr('stage', 'equalto', 'won')|sum(attribute='amount')|rub }}</b></div>
+</div>
+<div class="card">
+  <h2>Сделки</h2>
+  <table>
+    <tr><th>Сделка</th><th>Этап</th>{% if user.is_admin %}<th>Ответственный</th>{% endif %}<th class="num">Сумма</th></tr>
+    {% for d in deals %}
+    <tr><td><a href="/deals/{{ d.id }}">{{ d.title }}</a></td><td><span class="badge {{ d.stage }}">{{ d.stage_title }}</span></td>
+        {% if user.is_admin %}<td>{{ d.owner.name }}</td>{% endif %}<td class="num">{{ d.amount|rub }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">Сделок пока нет</td></tr>{% endfor %}
+  </table>
+  <details style="margin-top:14px">
+    <summary>+ Новая сделка с этим клиентом</summary>
+    <form method="post" action="/deals" class="form-grid">
+      <input type="hidden" name="client_id" value="{{ client.id }}">
+      <label>Название<input name="title" required></label>
+      <label>Сумма, ₽<input name="amount" type="number" min="0" value="0"></label>
+      {% if user.is_admin %}<label>Ответственный<select name="owner_id">{% for m in managers %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}</select></label>{% endif %}
+      <button>Создать</button>
+    </form>
+  </details>
+</div>
+{% endblock %}

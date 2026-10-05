@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Задачи</h1>
+<div class="toolbar">
+  <a class="btn light" href="/tasks{{ '' if show_done else '?done=true' }}">{{ 'Скрыть выполненные' if show_done else 'Показать выполненные' }}</a>
+  <details>
+    <summary>+ Новая задача</summary>
+    <form method="post" action="/tasks" class="form-grid card">
+      <label>Задача<input name="title" required></label>
+      <label>Срок<input name="due" type="date" value="{{ today().isoformat() }}" required></label>
+      <label>Сделка<select name="deal_id"><option value="0">— без сделки —</option>{% for d in deals %}<option value="{{ d.id }}">{{ d.title }}</option>{% endfor %}</select></label>
+      <button>Добавить</button>
+    </form>
+  </details>
+</div>
+<div class="card">
+  <table>
+    <tr><th style="width:44px"></th><th>Срок</th><th>Задача</th><th>Сделка</th>{% if user.is_admin %}<th>Ответственный</th>{% endif %}</tr>
+    {% for t in tasks %}
+    <tr>
+      <td>{% if not t.done %}<form class="inline" method="post" action="/tasks/{{ t.id }}/done"><button class="light" title="Готово">✓</button></form>{% else %}✅{% endif %}</td>
+      <td class="{{ 'overdue' if t.overdue }}">{{ t.due.strftime('%d.%m.%Y') }}{% if t.overdue %} · просрочена{% endif %}</td>
+      <td>{% if t.done %}<s class="muted">{{ t.title }}</s>{% else %}{{ t.title }}{% endif %}</td>
+      <td>{% if t.deal %}<a href="/deals/{{ t.deal.id }}">{{ t.deal.title }}</a>{% endif %}</td>
+      {% if user.is_admin %}<td>{{ t.owner.name }}</td>{% endif %}
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">Задач нет 🎉</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

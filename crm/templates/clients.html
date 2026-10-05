@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Клиенты</h1>
+<div class="toolbar">
+  <form method="get" action="/clients"><input name="q" value="{{ q }}" placeholder="Поиск: компания, контакт, телефон, email" size="40"> <button class="light">Найти</button></form>
+  <details>
+    <summary>+ Новый клиент</summary>
+    <form method="post" action="/clients" class="form-grid card">
+      <label>Компания или имя<input name="name" required></label>
+      <label>Контактное лицо<input name="contact"></label>
+      <label>Телефон<input name="phone"></label>
+      <label>Email<input name="email" type="email"></label>
+      <label>Источник<input name="source" placeholder="сайт, рекомендация…"></label>
+      <button>Добавить</button>
+    </form>
+  </details>
+</div>
+<div class="card">
+  <table>
+    <tr><th>Клиент</th><th>Контакт</th><th>Телефон</th><th>Email</th><th>Источник</th><th class="num">Сделок</th></tr>
+    {% for c in clients %}
+    <tr><td><a href="/clients/{{ c.id }}"><b>{{ c.name }}</b></a></td><td>{{ c.contact }}</td><td>{{ c.phone }}</td>
+        <td>{{ c.email }}</td><td><span class="muted">{{ c.source }}</span></td><td class="num">{{ c.deals|length }}</td></tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">Никого не нашли</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
